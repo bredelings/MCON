@@ -139,6 +139,29 @@ The prefix is either remove from all sub-fields are none of them.  So, if we hav
 "S1/": {"x": 10, "y":20} and "S2/": {"x":30, "z":40}, then we do not lift the fields "S1.y" and S2.z"
 (which do not conflict) because the fields S1.x and S2.x do conflict.
 
+Simplification
+--------------
+To simplify a nested JSON sample J, we
+
+1. Consider each nested (field/,value) pair in J.
+   a. replace the value with the simplified value.
+2. Consider each nested (field/,value) pair in J.
+   a. increment seen["field/"]
+   b. consider each (field2,value2) pair inside the value object.
+      i. increment seen["field2"]
+3. Consider each nested (field/value) pair in J.
+   a. consider each (field2,value2) pair inside the value object.
+   b. if seen[field2] > 1 for any field2, then we do nothing.
+   c. otherwise, we
+      i. remove the key "field/" from J.
+      ii. add all (field2,value2) pairs to the parent JSON object J.
+
+Example::
+  {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}
+  becomes
+  {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
+
+
 Atomic values
 -------------
 It is possible to translate sample lines so that every value is atomic.
