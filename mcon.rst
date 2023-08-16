@@ -41,15 +41,37 @@ Such a translation leaves out fields (e.g. "y") whose structure changes over tim
 
 Header
 ------
-The header line can contain the following keys:
+The header line *must* contain the following keys:
 
-1. "version": string
-2. "fields": array of string
-3. "nested": boolean
+- "format": "MCON"
+- "version": string
 
+These fields declare that the file conforms to the MCON specification, and which version is conforms to.
+
+The header line *may* contain the following keys:
+
+- "nested": boolean
+- "atomic": boolean
+- "fields": array of string
+
+Other keys are allowed, but are ignored.
+
+"atomic"
+~~~~~~~~
+If the value is `true`, then all field values are guaranteed not be to arrays or objects.
+This does not change the interpretation of the file -- it just allows the reader of the file
+to know that all the values are atomic without looking at later lines.
+
+"nested"
+~~~~~~~~
+If the value is `true`, the file is treated as Nested MCON.  Otherwise the file is treated as Non-Nested MCON.
+
+"fields"
+~~~~~~~~
 The "fields" attribute in the header line specifies the order of fields when translated to a table-based format such as CSV or TSV.
 Any fields not mentioned in the "fields" attribute occur after all the mentioned fields.
-The can occur in any order.
+Such fields can occur in any order.
+
    
 Unnested
 --------
