@@ -4,22 +4,23 @@ Monte-Carlo Object Notation (MCON)
 Introduction
 ------------
 
-Monte-Carlo Object Notation (MCON) is a data format for recording samples from Monte-Carlo algorithms.
+Monte-Carlo Object Notation (MCON) is a file format for recording samples from Monte-Carlo algorithms.
 The format accomodates multiple different algorithms, including Markov chain Monte Carlo (MCMC), Sequential Monte Carlo (SMC), etc.
 Each line is a JSON object, following the `JSON Lines <https://jsonlines.org>`_ format.
 The first line is called the "header line".
 All other lines are called "sample lines".
 Each sample line represents a Monte Carlo sample as a collection of (key,value) pairs.
 
-Many Monte Carlo programs record their samples using a *table-based* format such as CSV or TSV.
+Many software programs record Monte Carlo samples using a *table-based* file format such as CSV or TSV.
 Each column represents a random variable and each row represents a Monte Carlo sample.
 Usually the first line of the file gives the name for each random variable.
-This format requires that the number of variables remains constant, and usually also requires that the value for each variable is a single number.
+Such formats require that the number of variables remains constant.
+They also usually require that the value for each variable is a single number.
 
-The MCON format is designed to circumvent limitations of table-based formats by enabling
+The MCON format is designed to circumvent limitations of table-based formats by
 
-1. fields to have structured values, such as arrays.
-2. the number and structure of fields to change over time.
+1. enabling fields to have *structured values*, such as arrays.
+2. enabling the number and structure of fields to *change over time*.
 
 Example::
 
@@ -37,7 +38,7 @@ Example::
   10,1.1,2.2,3.3,0.3,0.7
   20,1.2,2.3,3.1,0.4,0.6
 
-Such a translation leaves out fields (e.g. "y") whose structure changes over time.
+Such a conversion drops fields (e.g. "y" above) whose structure is not fixed.
 
 Header
 ------
@@ -123,15 +124,22 @@ Simplification
 To simplify a nested JSON sample J, we
 
 1. Consider each nested (field/,value) pair in J.
+
    a. replace the value with the simplified value.
+
 2. Consider each nested (field/,value) pair in J.
+
    a. increment seen["field/"]
    b. consider each (field2,value2) pair inside the value object.
+
       i. increment seen["field2"]
+
 3. Consider each nested (field/value) pair in J.
+
    a. consider each (field2,value2) pair inside the value object.
    b. if seen[field2] > 1 for any field2, then we do nothing.
    c. otherwise, we
+
       i. remove the key "field/" from J.
       ii. add all (field2,value2) pairs to the parent JSON object J.
 
@@ -177,6 +185,7 @@ Since JSON values never contain unescaped tab characters, it is possible to cons
 Issues: how might this interact with TSV escapes?  Presumably we can say that such files should be read with no tsv escapes...
 
 In order to convert an MCON file to TSJ, we need to
+
 1. convert it to non-nested MCON
 2. fail if not every sample line contains the same fields
 3. determine an order for the fields, taking into account the header line
@@ -185,9 +194,12 @@ In order to convert an MCON file to TSJ, we need to
 
 Conversion to TSV
 ~~~~~~~~~~~~~~~~~
+
 In order to convert an MCON file to TSV, we need to convert it to atomic MCON, and then 
+
 1. convert it to atomic MCON
 2. convert it to TSJ
+
 Since every JSON value is atomic, such a file can be read by software that expects atomic values.
 
 However, it can contain strings, booleans, and null in addition to numbers.
