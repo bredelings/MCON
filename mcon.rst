@@ -73,17 +73,18 @@ Any fields not mentioned in the "fields" attribute occur after all the mentioned
 Such fields can occur in any order.
 
    
-Unnested
+Non-Nested
 --------
-The (key,value) pairs in unnested JSON object directly represent (field,value) pairs.
+The (key,value) pairs in non-nested JSON object directly represent (field,value) pairs.
 
 Nested
 ------
-In a nested JSON object, a key that ends with an unescaped "/" is called a nested key.
-Other keys are called unnested keys.
-The unnested keys represent (field,value) pairs directly.
+In a nested JSON object, only the last character of a key can be "/".
+A key that ends with an "/" is *nested*.
+Other keys are *non-nested*.
+The non-nested keys represent (field,value) pairs directly.
 
-To interpret a nested key "field/", we
+To interpret a nested key ("field/",value), we
 
 1. **translate** its JSON value into a set of (field,value) pairs.  The value may also contain nested keys, so this translation is recursive.
 2. **replace** each of the sub-field names "name" "{field}/{name}".
@@ -91,32 +92,10 @@ To interpret a nested key "field/", we
 Example::
   The nested sample line
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"x":20, "y":4.13}}
-  corresponds to the unnested sample line
+  corresponds to the non-nested sample line
      {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
-  
-Issue: currently, we are translating to short names when unnesting.
-     
-Escape characters
-~~~~~~~~~~~~~~~~~
-We interpret the backslash "\" as an escape character.
-The escape character applies only to itself and the "/" character.
-It also applies only at the end of a string that ends with "/".
 
-Thus, for a key that ends with "/", we
-
-1. count the number M of preceding escape characters
-2. compute the integer N = M/2, rounding down.
-3. replace the M escape characters with N escape characters.
-4. count the key as nested if M is odd, and as unnested if M is even.
-
-Thus
-
-- "a\/" corresponds to an unnested key "a/"
-- "a\\/" corresponds to a nested key "a\/"
-- "a\\\/" corresponds to an unnested key "a\/"
-- "a\\\\/" corresponds to a nested key "a\\/"
-
-Short names
+Unnesting
 -----------
 When unnesting fields, each field has a "long name" and a "short name".
 
@@ -129,13 +108,13 @@ Example::
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}
   long names:
      {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
-  long names:
+  short names:
      {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
 
-To create the unnested value with short names, we simply lift the fields from a sub-object into the current object
+To create the non-nested value with short names, we simply lift the fields from a sub-object into the current object
 if no name clashes are introduced by doing so.
 
-The prefix is either remove from all sub-fields are none of them.  So, if we have the sub-objects
+The prefix is either removed from all sub-fields are none of them.  So, if we have the sub-objects
 "S1/": {"x": 10, "y":20} and "S2/": {"x":30, "z":40}, then we do not lift the fields "S1.y" and S2.z"
 (which do not conflict) because the fields S1.x and S2.x do conflict.
 
@@ -198,7 +177,7 @@ Since JSON values never contain unescaped tab characters, it is possible to cons
 Issues: how might this interact with TSV escapes?  Presumably we can say that such files should be read with no tsv escapes...
 
 In order to convert an MCON file to TSJ, we need to
-1. convert it to unnested MCON 
+1. convert it to non-nested MCON
 2. fail if not every sample line contains the same fields
 3. determine an order for the fields, taking into account the header line
 4. write the field names separated by tabs as a header line
