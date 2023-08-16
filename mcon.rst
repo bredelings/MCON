@@ -19,8 +19,10 @@ Like the MCON format, each line represents a Monte Carlo sample.
 It usually also requires that value for each variable have a value that is a single number.
 
 The MCON format is designed to circumvent limitations of table-based formats by
+
 1. allowing fields to have structured values, such as arrays.
 2. allowing the number and structure of fields to change over time.
+
 Each sample line specified a number of (field,value) pairs.
 
 Example::
@@ -65,6 +67,7 @@ Other keys are called unnested keys.
 The unnested keys represent (field,value) pairs directly.
 
 To interpret a nested key "field/", we
+
 1. translate its JSON value into a set of (field,value) pairs.  The value may also contain nested keys, so this translation is recursive.
 2. we prefix each field name with "field.".
 
@@ -80,6 +83,7 @@ Escape characters
 ~~~~~~~~~~~~~~~~~
 We interpret the backslash "\" as an escape character at the end of the key.
 Thus
+
 - "a\/" corresponds to an unnested key "a/"
 - "a\\/" corresponds to a nested key "a\/"
 - "a\\\/" corresponds to an unnested key "a\/"
