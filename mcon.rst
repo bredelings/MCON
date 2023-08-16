@@ -6,30 +6,26 @@ Introduction
 
 Monte-Carlo Object Notation (MCON) is a data format for recording samples from Monte-Carlo algorithms.
 The format accomodates multiple different algorithms, including Markov chain Monte Carlo (MCMC), Sequential Monte Carlo (SMC), etc.
-Each line is a JSON object, following the JSON Lines format.
+Each line is a JSON object, following the `JSON Lines <https://jsonlines.org>`_ format.
 The first line is called the "header line".
 All other lines are called "sample lines".
 Each sample line represents a Monte Carlo sample as a collection of (key,value) pairs.
 
-Many Monte Carlo programs record their samples using a table-based format such as CSV or TSV.
-Each column represents a random variable, and the first line of the file usually gives the variable name for each column.
-Each row represents the value for each variable in a given Monte Carlo sample.
-This format requires that the number of variables remains constant.
-Like the MCON format, each line represents a Monte Carlo sample.
-It usually also requires that value for each variable have a value that is a single number.
+Many Monte Carlo programs record their samples using a *table-based* format such as CSV or TSV.
+Each column represents a random variable and each row represents a Monte Carlo sample.
+Usually the first line of the file gives the name for each random variable.
+This format requires that the number of variables remains constant, and usually also requires that the value for each variable is a single number.
 
-The MCON format is designed to circumvent limitations of table-based formats by
+The MCON format is designed to circumvent limitations of table-based formats by enabling
 
-1. allowing fields to have structured values, such as arrays.
-2. allowing the number and structure of fields to change over time.
-
-Each sample line specified a number of (field,value) pairs.
+1. fields to have structured values, such as arrays.
+2. the number and structure of fields to change over time.
 
 Example::
 
   {"fields": ["iter","x"], nested: false, version: 0.1}
-  {"iter": 10, "x": [1.1, 2.2, 3.3], "pi": {"A":0.3, "T":0.7}}
-  {"iter": 20, "x": [1.2, 2.3, 3.1]}, "pi": {A":0.4, "T":0.6}}
+  {"iter": 10, "x": [1.1, 2.2, 3.3], "pi": {"A":0.3, "T":0.7}, "y": [1,2]}
+  {"iter": 20, "x": [1.2, 2.3, 3.1]}, "pi": {A":0.4, "T":0.6}}, "y": [3]
 
 However, it is sometimes important to be able to convert this more flexible format back to a format like CSV or TSV.
 The MCON format thus specifies a method of doing so.
@@ -41,24 +37,23 @@ Example::
   10,1.1,2.2,3.3,0.3,0.7
   20,1.2,2.3,3.1,0.4,0.6
 
-Such a translation will only work when each sample line contains the same fields,
-and each field has the same structure.
+Such a translation leaves out fields (e.g. "y") whose structure changes over time.
 
 Header
 ------
-The header line can contain the following fields.
+The header line can contain the following keys:
 
 1. "version": string
 2. "fields": array of string
 3. "nested": boolean
 
 The "fields" attribute in the header line specifies the order of fields when translated to a table-based format such as CSV or TSV.
-Any fields not mentioned in the fields attribute occur after all the mentioned fields.
+Any fields not mentioned in the "fields" attribute occur after all the mentioned fields.
 The can occur in any order.
    
 Unnested
 --------
-The (key,value) pairs in unnested JSON object represents (field,value) pairs directly.
+The (key,value) pairs in unnested JSON object directly represent (field,value) pairs.
 
 Nested
 ------
@@ -68,29 +63,37 @@ The unnested keys represent (field,value) pairs directly.
 
 To interpret a nested key "field/", we
 
-1. translate its JSON value into a set of (field,value) pairs.  The value may also contain nested keys, so this translation is recursive.
-2. we prefix each field name with "field.".
+1. **translate** its JSON value into a set of (field,value) pairs.  The value may also contain nested keys, so this translation is recursive.
+2. **replace** each of the sub-field names "name" "{field}/{name}".
 
 Example::
   The nested sample line
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"x":20, "y":4.13}}
   corresponds to the unnested sample line
-     {"iter": 10, "S1.x": 10, S1.y": 3.14, "S2.x": 20, "S2.y": 4.13}
+     {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
   
 Issue: currently, we are translating to short names when unnesting.
      
 Escape characters
 ~~~~~~~~~~~~~~~~~
-We interpret the backslash "\" as an escape character at the end of the key.
+We interpret the backslash "\" as an escape character.
+The escape character applies only to itself and the "/" character.
+It also applies only at the end of a string that ends with "/".
+
+Thus, for a key that ends with "/", we
+
+1. count the number M of preceding escape characters
+2. compute the integer N = M/2, rounding down.
+3. replace the M escape characters with N escape characters.
+4. count the key as nested if M is odd, and as unnested if M is even.
+
 Thus
 
 - "a\/" corresponds to an unnested key "a/"
 - "a\\/" corresponds to a nested key "a\/"
 - "a\\\/" corresponds to an unnested key "a\/"
+- "a\\\\/" corresponds to a nested key "a\\/"
 
-However, note that when such a field name is written in a language like python with its own escaping, escape backslashes must be added.
-So, in python, one would have to write "a\\/" to represent "a\/";
-  
 Short names
 -----------
 When unnesting fields, each field has a "long name" and a "short name".
@@ -103,7 +106,7 @@ Example::
   The nested sample line
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}
   long names:
-     {"iter": 10, "S1.x": 10, S1.y": 3.14, "S2.x": 20, "S2.y": 4.13}
+     {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
   long names:
      {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
 
