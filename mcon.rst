@@ -86,8 +86,8 @@ The non-nested keys represent (field,value) pairs directly.
 
 To interpret a nested key ("field/",value), we
 
-1. **translate** its JSON value into a set of (field,value) pairs.  The value may also contain nested keys, so this translation is recursive.
-2. **replace** each of the sub-field names "name" "{field}/{name}".
+1. **translate** its JSON value into a set of (field2,value2) pairs.  The value may also contain nested keys, so this translation is recursive.
+2. **replace** each of the sub-field names `field2` with "{field/}{field2}".
 
 Example::
   The nested sample line
