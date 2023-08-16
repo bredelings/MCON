@@ -12,7 +12,7 @@ All other lines are called "sample lines".
 Each sample line represents a Monte Carlo sample as a collection of (key,value) pairs.
 
 Many Monte Carlo programs record their samples using a table-based format such as CSV or TSV.
-Each column represents a random variable. The first line usually give the variable name for each column.
+Each column represents a random variable, and the first line of the file usually gives the variable name for each column.
 Each row represents the value for each variable in a given Monte Carlo sample.
 This format requires that the number of variables remains constant.
 Like the MCON format, each line represents a Monte Carlo sample.
@@ -110,12 +110,11 @@ The prefix is either remove from all sub-fields are none of them.  So, if we hav
 "S1/": {"x": 10, "y":20} and "S2/": {"x":30, "z":40}, then we do not lift the fields "S1.y" and S2.z"
 (which do not conflict) because the fields S1.x and S2.x do conflict.
 
+Atomic values
+-------------
+It is possible to translate sample lines so that every value is atomic.
+This is useful when converting to TSV files, for sample.
 
-Conversion to TSV
------------------
-It is possible to convert MCON fields to TSV files where each value is an atomic JSON value.
-
-This requires translating array and object values to multiple atomic fields.
 To do this that we recursively visit each entry of a structured value, adding "[{key}]" to the end of the field name. For an array, "{key}" is the 1-based index, and for an object the "{key"} is the key.
 When we finally come to a value that is atomic, we record the (field,value) pair.
 
@@ -137,6 +136,31 @@ Example::
 Issue: this could *in theory* create name conflicts, if the object that contained "pi"
 also contained an object called "pi[A]".
 
+Conversion to other formats
+-----------------
+
+Conversion to TSJ
+~~~~~~~~~~~~~~~~~
+Since JSON values never contain unescaped tab characters, it is possible to construct TSV files where each value is a JSON value.  We refer to this as tab-separate JSON (TSJ) format.
+
+Issues: how might this interact with TSV escapes?  Presumably we can say that such files should be read with no tsv escapes...
+
+In order to convert an MCON file to TSJ, we need to
+1. convert it to unnested MCON 
+2. fail if not every sample line contains the same fields
+3. determine an order for the fields, taking into account the header line
+4. write the field names separated by tabs as a header line
+5. for each sample line, write the JSON values separated by tabs in the correct order.
+
+Conversion to TSV
+~~~~~~~~~~~~~~~~~
+In order to convert an MCON file to TSV, we need to convert it to atomic MCON, and then 
+1. convert it to atomic MCON
+2. convert it to TSJ
+Since every JSON value is atomic, such a file can be read by software that expects atomic values.
+
+However, it can contain strings, booleans, and null in addition to numbers.
+
 Records and data types
 ----------
 
@@ -157,3 +181,4 @@ For example, we might have a record type that indicates that the JSON value for 
 In order to multiple record shapes to be part of the same data type, we allow an additional key "@$type".
 In languages like C++ or Java, the record shape would be considered a type.
 However, in languages with algebraic data types (such as Rust), a data type can include multiple record shapes.
+
