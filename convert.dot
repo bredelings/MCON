@@ -4,11 +4,13 @@ node [fontname=Arial, style="rounded,filled", height=0, width=0, shape=box];
 edge [style="setlinewidth(2)"];
 #comment
 
-nested -> non_nested [label="unnest"]
-
-nested -> nested_atomized [label="atomize"]
 nested -> nested [label="simplify"]
-non_nested -> non_nested_atomized [label="atomize"]
 
+# Do "atomize" and "unnest" commute?
+
+nested -> non_nested [label="unnest"]
+nested -> nested_atomized [label="atomize"]
+non_nested -> non_nested_atomized [label="atomize"]
+nested_atomized -> non_nested_atomized [label="unnest"]
 
 }
