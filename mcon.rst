@@ -2,6 +2,7 @@
 Monte-Carlo Object Notation (MCON)
 ==================================
 
+.. sectnum::
 .. contents:: Table of Contents
 
 Introduction
