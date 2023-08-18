@@ -80,7 +80,7 @@ Nested MCON
 ------
 In a nested JSON object, only the last character of a key can be "/".
 A key that ends with an "/" is *nested*.
-Other keys are *non-nested*.
+All other keys are *non-nested*.
 The non-nested keys represent (field,value) pairs directly.
 The nested keys represent a set of (field,value) pairs.
 
