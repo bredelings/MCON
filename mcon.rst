@@ -173,7 +173,7 @@ to construct a mapping from "long names" to "short names".
 In order to convert an MCON file to TSJ, we need to
 
 1. convert it to non-nested MCON
-2. Drop variable fields
+2. drop variable fields
 3. fail if not every sample line contains the same fields
 4. determine an order for the fields, taking into account the header line
 5. write the field names separated by tabs as a header line
@@ -210,14 +210,26 @@ The value for the key ``@$value`` must be an object, and its keys represent the 
 
 Thus if we have::
 
-  "rates": {"@$record": "DiscreteDistribution", "@$value": {"weights": [0.2,0.3,0.5], "values": [0.2, 1.1, 3.4]}}
+  "rates": {"@$record": "DiscreteDistribution",
+            "@$value":  {"weights": [0.2, 0.3, 0.5],
+                         "values": [0.2, 1.1, 3.4] } }
 
 Then we consider this to represent a record shape ``DiscreteDistribution`` with fields ``weights`` and ``values``.
+In order to multiple record shapes to be part of the same data type, we allow an additional key ``@$type``.
+In languages like C++ or Java, the record shape would be considered a type.
+However, in languages with algebraic data types (such as Rust), a data type can include multiple record shapes.
 
 The purpose of this feature is to indicate the meaning of the values in each Monte Carlo sample so that appropriate summary measures can be computed.
 For example, we might have a record type that indicates that the JSON value for "N" describes a population size history through time for a coalescent model.
 
-In order to multiple record shapes to be part of the same data type, we allow an additional key "@$type".
-In languages like C++ or Java, the record shape would be considered a type.
-However, in languages with algebraic data types (such as Rust), a data type can include multiple record shapes.
+..
+  How should we handle translation of MCON files to TSV?
+  By default, we want to simplify.
+  But I think we want the simplification to simply create a mapping from long names -> short names.
+  We don't want to run simplify( ) on each line separately.
+
+  Should we separate translation to TSV from removal of fields that
+  (a) are not always present or
+  (b) have variable structure?
+
 
