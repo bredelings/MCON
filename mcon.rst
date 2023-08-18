@@ -168,8 +168,8 @@ Examples:
 Issue: this could *in theory* create name conflicts, if the object that contained "pi"
 also contained an object called "pi[A]".
 
-Dropping fields with variable structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dropping fields with variable structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The structure of a value is given by the collection of suffixes used when transformation to a set of atomic values.
 For example, ``"x": [1,2]`` has the structure ``{"[1]","[2]"}``.
 If the structure of a variable is different in different samples, then wish to drop all of its values.
