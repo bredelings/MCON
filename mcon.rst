@@ -2,7 +2,7 @@
 Monte-Carlo Object Notation (MCON)
 ==================================
 
-.. contents::
+.. contents:: Table of Contents
 
 Introduction
 ------------
