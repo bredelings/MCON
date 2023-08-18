@@ -138,13 +138,13 @@ This is useful when converting to TSV files, for sample.
 To do this that we recursively visit each entry of a structured value, adding "[{key}]" to the end of the field name. For an array, "{key}" is the 1-based index, and for an object the "{key"} is the key.
 When we finally come to a value that is atomic, we record the (field,value) pair.
 
-Example::
+Example:
 
-  "x": [1,4,10] is translated to "x[1]": 1, "x[2]": 4, "x[3]": 10
+  ``"x": [1,4,10]`` is translated to ``"x[1]": 1, "x[2]": 4, "x[3]": 10``
 
-  "pi": {"A":0.1, "C": 0.2, "G": 0.3, "T":0.4} is translated to "pi[A]": 0.1, "pi[C]": 0.2, "pi[G]": 0.3, "pi[T]": 0.4
+  ``"pi": {"A":0.1, "C": 0.2, "G": 0.3, "T":0.4}`` is translated to ``"pi[A]": 0.1, "pi[C]": 0.2, "pi[G]": 0.3, "pi[T]": 0.4``
 
-  "y": [[1,2],[3,4]] is translated to "y[1][1]": 1, "y[1][2]": 2, "y[2][1]": 3, "y[2][2]": 4
+  ``"y": [[1,2],[3,4]]`` is translated to ``"y[1][1]": 1, "y[1][2]": 2, "y[2][1]": 3, "y[2][2]": 4``
 
 Issue: this could *in theory* create name conflicts, if the object that contained "pi"
 also contained an object called "pi[A]".
