@@ -210,27 +210,30 @@ Since every JSON value is atomic, such a file can be read by software that expec
 
 However, it can contain strings, booleans, and null in addition to numbers.
 
-Records and data types
-----------
+.. 
+  Records and data types
+  ----------
 
-In order to represent more complex objects than arrays and objects, we introduce a special notation.
+  In order to represent more complex objects than arrays and objects, we introduce a special notation.
 
-If a field value contains the keys ``@$record`` and ``@$value`` then we consider it to represent a record type.
-The value for the key ``@$value`` must be an object, and its keys represent the fields for that object.
+  If a field value contains the keys ``@$record`` and ``@$value`` then we consider it to represent a record type.
+  The value for the key ``@$value`` must be an object, and its keys represent the fields for that object.
 
-Thus if we have::
+  Thus if we have::
 
-  "rates": {"@$record": "DiscreteDistribution",
-            "@$value":  {"weights": [0.2, 0.3, 0.5],
-                         "values": [0.2, 1.1, 3.4] } }
+    "rates": {"@$record": "DiscreteDistribution",
+              "@$value":  {"weights": [0.2, 0.3, 0.5],
+                           "values": [0.2, 1.1, 3.4] } }
 
-Then we consider this to represent a record shape ``DiscreteDistribution`` with fields ``weights`` and ``values``.
-In order to multiple record shapes to be part of the same data type, we allow an additional key ``@$type``.
-In languages like C++ or Java, the record shape would be considered a type.
-However, in languages with algebraic data types (such as Rust), a data type can include multiple record shapes.
+  Then we consider this to represent a record shape ``DiscreteDistribution`` with fields ``weights`` and ``values``.
+  In order to multiple record shapes to be part of the same data type, we allow an additional key ``@$type``.
+  In languages like C++ or Java, the record shape would be considered a type.
+  However, in languages with algebraic data types (such as Rust), a data type can include multiple record shapes.
 
-The purpose of this feature is to indicate the meaning of the values in each Monte Carlo sample so that appropriate summary measures can be computed.
-For example, we might have a record type that indicates that the JSON value for "N" describes a population size history through time for a coalescent model.
+  The purpose of this feature is to indicate the meaning of the values in each Monte Carlo sample so that appropriate summary measures can be computed.
+  For example, we might have a record type that indicates that the JSON value for "N" describes a population size history through time for a coalescent model.
+
+    
 
 ..
   How should we handle translation of MCON files to TSV?
