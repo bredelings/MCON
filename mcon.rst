@@ -42,8 +42,8 @@ For example, the above MCON file would be translated to CSV as::
 
 Such a conversion drops fields (e.g. "y" above) whose structure is not fixed.
 
-Header
-------
+Header line
+-----------
 The header line *must* contain the following keys:
 
 - "format": "MCON"
@@ -63,7 +63,7 @@ Other keys are allowed, but are ignored.
 ~~~~~~~~
 If the value is ``true``, then all field values are guaranteed not be to arrays or objects.
 This does not change the interpretation of the file -- it just allows the reader of the file
-to know that all the values are atomic without looking at later lines.
+to know that all the values are atomic before looking at later lines.
 
 "nested"
 ~~~~~~~~
@@ -75,7 +75,7 @@ The ``fields`` attribute in the header line specifies the order of fields when t
 Any fields not mentioned in the "fields" attribute occur after all the mentioned fields.
 Such fields can occur in any order.
 
-   
+
 Non-Nested MCON
 ---------------
 The (key,value) pairs in non-nested JSON object directly represent (field,value) pairs.
@@ -88,10 +88,9 @@ All other keys are *non-nested*.
 The non-nested keys represent (field,value) pairs directly.
 The nested keys represent a set of (field,value) pairs.
 
-To determine the set of (field2,value2) pairs represented by a nested key ("field/",value), we
-
-1. **translate** its JSON `value` into a set of (`field2`,`value2`) pairs.  The value may also contain nested keys, so this translation is recursive.
-2. **replace** each of the sub-field names `field2` with "{field/}{field2}".
+The value for a nested key *must* be a JSON object.
+The set of (field,value) pairs represented by a nested key (k,v) is simply the union of all the (field,value) pairs for ``v`` with ``k`` prepended to the field name.
+For example, the (field,value) pairs for ("key1/", {"key2":2, "key3":2}) are given by the set {"key1/key2": 2, "key1/key3": 2}.
 
 Example::
 
@@ -99,6 +98,10 @@ Example::
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"x":20, "y":4.13}}
   corresponds to the non-nested sample line
      {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
+
+..
+  We COULD forbid an object to contain both "key/" and "key".
+  That would make "key/" more like a directory in a filesystem path.
 
 Transformations:
 ----------------
