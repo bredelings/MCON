@@ -57,13 +57,13 @@ Other keys are allowed, but are ignored.
 
 "atomic"
 ~~~~~~~~
-If the value is `true`, then all field values are guaranteed not be to arrays or objects.
+If the value is ``true``, then all field values are guaranteed not be to arrays or objects.
 This does not change the interpretation of the file -- it just allows the reader of the file
 to know that all the values are atomic without looking at later lines.
 
 "nested"
 ~~~~~~~~
-If the value is `true`, the file is treated as Nested MCON.  Otherwise the file is treated as Non-Nested MCON.
+If the value is ``true``, the file is treated as Nested MCON.  Otherwise the file is treated as Non-Nested MCON.
 
 "fields"
 ~~~~~~~~
@@ -95,10 +95,12 @@ Example::
   corresponds to the non-nested sample line
      {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
 
-We refer to the transformation of a nested sampling into the corresponding non-nested sample as "unnesting".
+Transformation: Unnesting
+~~~~~~~~~~~~~~~~~~~~~~~~~
+We refer to the transformation of a nested sample into the corresponding non-nested sample as "unnesting".
 
 Transformation: Simplification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To simplify a nested JSON sample J, we
 
 1. Consider each nested (field/,value) pair in J.
@@ -147,11 +149,11 @@ also contained an object called "pi[A]".
 Transformation: Dropping fields with variable structures
 --------------------------------------------
 The structure of a value is given by the collection of suffixes used when transformation to a set of atomic values.
-For example, `"x": [1,2]` has the structure `{"[1]","[2]"}`.
+For example, ``"x": [1,2]`` has the structure ``{"[1]","[2]"}``.
 If the structure of a variable is different in different samples, then wish to drop all of its values.
 
-Note that it could be that `x[1]` has variable fields, while `x[2]` does not.
-In such a case, we probably want to drop only `x[2]`, while marking `x[1]` as variable structure.
+Note that it could be that ``x[1]`` has variable fields, while ``x[2]`` does not.
+In such a case, we probably want to drop only ``x[2]``, while marking ``x[1]`` as variable structure.
 
 Conversion to other formats
 -----------------
