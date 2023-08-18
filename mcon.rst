@@ -30,7 +30,7 @@ Example::
 
 However, it is sometimes important to be able to convert this more flexible format back to a format like CSV or TSV.
 The MCON format thus specifies a method of doing so.
-For example, the above MCON file would be translated to CSV as
+For example, the above MCON file would be translated to CSV as::
 
   iter,x[1],x[2],x[3],pi[A],pi[T]
   10,1.1,2.2,3.3,0.3,0.7
