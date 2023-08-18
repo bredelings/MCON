@@ -76,11 +76,11 @@ Such fields can occur in any order.
 
    
 Non-Nested MCON
---------
+---------------
 The (key,value) pairs in non-nested JSON object directly represent (field,value) pairs.
 
 Nested MCON
-------
+-----------
 In a nested JSON object, only the last character of a key can be "/".
 A key that ends with an "/" is *nested*.
 All other keys are *non-nested*.
@@ -99,12 +99,21 @@ Example::
   corresponds to the non-nested sample line
      {"iter": 10, "S1/x": 10, S1/y": 3.14, "S2/x": 20, "S2/y": 4.13}
 
-Transformation: Unnesting
+Transformations:
+----------------
+     
+Unnesting
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-We refer to the transformation of a nested sample into the corresponding non-nested sample as "unnesting".
+This transformation only applies to Nested MCON.
 
-Transformation: Simplification
+1. The header line is modified to replace ``"nested": true`` with ``"nested": false`.
+2. Each sample line is replaced with a JSON object containing the union of the (field,value) pairs represented by the keys in the original nested file.
+
+
+Simplification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This transformation only applies to Nested MCON.
+
 To simplify a nested JSON sample J, we
 
 1. Consider each nested (field/,value) pair in J.
@@ -141,8 +150,8 @@ The Simplification procedure also creates a corresponding "short name" for each 
 * ``S2/z`` ↔ ``z``
 * ``S2/w`` ↔ ``w``
 
-Transformation: Atomic values
------------------------------
+Atomic values
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 It is possible to translate sample lines so that every value is atomic.
 This transformation is useful when converting MCON files to TSV files, for example.
 It applies to both nested and non-nested files.
@@ -159,8 +168,8 @@ Examples:
 Issue: this could *in theory* create name conflicts, if the object that contained "pi"
 also contained an object called "pi[A]".
 
-Transformation: Dropping fields with variable structures
---------------------------------------------
+Dropping fields with variable structures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The structure of a value is given by the collection of suffixes used when transformation to a set of atomic values.
 For example, ``"x": [1,2]`` has the structure ``{"[1]","[2]"}``.
 If the structure of a variable is different in different samples, then wish to drop all of its values.
