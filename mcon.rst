@@ -130,6 +130,13 @@ Example::
   becomes
   {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
 
+The Simplification procedure also creates a corresponding "short name" for each field::
+
+  * ``S1/x`` <-> ``x``
+  * ``S1/y`` <-> ``y``
+  * ``S2/z`` <-> ``z``
+  * ``S2/w`` <-> ``w``
+
 Transformation: Atomic values
 -------------
 It is possible to translate sample lines so that every value is atomic.
