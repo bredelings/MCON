@@ -43,15 +43,15 @@ Header
 The header line *must* contain the following keys:
 
 - "format": "MCON"
-- "version": string
+- "version": *string*
 
 These fields declare that the file conforms to the MCON specification, and which version is conforms to.
 
 The header line *may* contain the following keys:
 
-- "nested": boolean
-- "atomic": boolean
-- "fields": array of string
+- "nested": *boolean*
+- "atomic": *boolean*
+- "fields": *array* of *string*
 
 Other keys are allowed, but are ignored.
 
@@ -67,7 +67,7 @@ If the value is ``true``, the file is treated as Nested MCON.  Otherwise the fil
 
 "fields"
 ~~~~~~~~
-The "fields" attribute in the header line specifies the order of fields when translated to a table-based format such as CSV or TSV.
+The ``fields`` attribute in the header line specifies the order of fields when translated to a table-based format such as CSV or TSV.
 Any fields not mentioned in the "fields" attribute occur after all the mentioned fields.
 Such fields can occur in any order.
 
@@ -90,6 +90,7 @@ To determine the set of (field2,value2) pairs represented by a nested key ("fiel
 2. **replace** each of the sub-field names `field2` with "{field/}{field2}".
 
 Example::
+
   The nested sample line
      {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"x":20, "y":4.13}}
   corresponds to the non-nested sample line
@@ -124,6 +125,7 @@ To simplify a nested JSON sample J, we
       ii. add all (field2,value2) pairs to the parent JSON object J.
 
 Example::
+
   {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}
   becomes
   {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
@@ -137,6 +139,7 @@ To do this that we recursively visit each entry of a structured value, adding "[
 When we finally come to a value that is atomic, we record the (field,value) pair.
 
 Example::
+
   "x": [1,4,10] is translated to "x[1]": 1, "x[2]": 4, "x[3]": 10
 
   "pi": {"A":0.1, "C": 0.2, "G": 0.3, "T":0.4} is translated to "pi[A]": 0.1, "pi[C]": 0.2, "pi[G]": 0.3, "pi[T]": 0.4
@@ -202,14 +205,14 @@ Records and data types
 
 In order to represent more complex objects than arrays and objects, we introduce a special notation.
 
-If a field value contains the keys "@$record" and "@$value" then we consider it to represent a record type.
-The value for the key "@$value" must be an object, and its keys represent the fields for that object.
+If a field value contains the keys ``@$record`` and ``@$value`` then we consider it to represent a record type.
+The value for the key ``@$value`` must be an object, and its keys represent the fields for that object.
 
 Thus if we have::
 
   "rates": {"@$record": "DiscreteDistribution", "@$value": {"weights": [0.2,0.3,0.5], "values": [0.2, 1.1, 3.4]}}
 
-Then we consider this to represent a record shape "DiscreteDistribution" with fields "weights" and "values".
+Then we consider this to represent a record shape ``DiscreteDistribution`` with fields ``weights`` and ``values``.
 
 The purpose of this feature is to indicate the meaning of the values in each Monte Carlo sample so that appropriate summary measures can be computed.
 For example, we might have a record type that indicates that the JSON value for "N" describes a population size history through time for a coalescent model.
