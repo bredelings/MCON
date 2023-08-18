@@ -127,11 +127,11 @@ To simplify a nested JSON sample J, we
       i. remove the key "field/" from J.
       ii. add all (field2,value2) pairs to the parent JSON object J.
 
-Example::
+Example:
 
-  {"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}
-  becomes
-  {"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}
+``{"iter": 10, "S1/: {"x": 10, "y": 3.14}, "S2/": {"z":20, "w":4.13}}``
+becomes
+``{"iter": 10, "x": 10, y": 3.14, "z": 20, "w": 4.13}``
 
 The Simplification procedure also creates a corresponding "short name" for each field:
 
