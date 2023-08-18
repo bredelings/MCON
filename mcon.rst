@@ -139,9 +139,10 @@ The Simplification procedure also creates a corresponding "short name" for each 
   * ``S2/w`` ↔ ``w``
 
 Transformation: Atomic values
--------------
+-----------------------------
 It is possible to translate sample lines so that every value is atomic.
-This is useful when converting to TSV files, for sample.
+This transformation is useful when converting MCON files to TSV files, for example.
+It applies to both nested and non-nested files.
 
 To do this that we recursively visit each entry of a structured value, adding "[{key}]" to the end of the field name. For an array, "{key}" is the 1-based index, and for an object the "{key"} is the key.
 When we finally come to a value that is atomic, we record the (field,value) pair.
