@@ -24,15 +24,13 @@ The MCON format is designed to circumvent limitations of table-based formats by
 
 Example::
 
-  {"fields": ["iter","x"], nested: false, version: 0.1}
+  {"fields": ["iter","x"], "nested": false, "format": "MCON", "version": 0.1}
   {"iter": 10, "x": [1.1, 2.2, 3.3], "pi": {"A":0.3, "T":0.7}, "y": [1,2]}
   {"iter": 20, "x": [1.2, 2.3, 3.1]}, "pi": {A":0.4, "T":0.6}}, "y": [3]
 
 However, it is sometimes important to be able to convert this more flexible format back to a format like CSV or TSV.
 The MCON format thus specifies a method of doing so.
-For example, the above MCON file would be translated to
-
-Example::
+For example, the above MCON file would be translated to CSV as
 
   iter,x[1],x[2],x[3],pi[A],pi[T]
   10,1.1,2.2,3.3,0.3,0.7
