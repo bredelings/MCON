@@ -132,10 +132,11 @@ Example::
 
 The Simplification procedure also creates a corresponding "short name" for each field::
 
-  * ``S1/x`` <-> ``x``
-  * ``S1/y`` <-> ``y``
-  * ``S2/z`` <-> ``z``
-  * ``S2/w`` <-> ``w``
+  * ``iter`` ↔ ``iter``
+  * ``S1/x`` ↔ ``x``
+  * ``S1/y`` ↔ ``y``
+  * ``S2/z`` ↔ ``z``
+  * ``S2/w`` ↔ ``w``
 
 Transformation: Atomic values
 -------------
