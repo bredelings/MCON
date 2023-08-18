@@ -1,3 +1,5 @@
+.. contents::
+
 Monte-Carlo Object Notation (MCON)
 ==================================
 
