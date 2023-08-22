@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",help="file to convert")
 parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON")
 parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON")
+parser.add_argument("--output",help="output format")
 args = parser.parse_args()
 
 def is_nested_key(key):
@@ -32,7 +33,8 @@ def get_keys_nested(sample):
             for key2 in keys2:
                 keys.add(key + key2)
         else:
-            keys.add(key)    
+            keys.add(key)
+    return keys
 
 class LogFile(object):
     def __init__(self, header, samples):
@@ -58,15 +60,33 @@ class LogFile(object):
         for sample in self.samples:
             print(json.dumps(sample),**kwargs)
 
+    def get_keys(self):
+        if self.nested:
+            return get_keys_nested(self.samples[0])
+        else:
+            return get_keys_non_nested(self.samples[0])
+            
     def dump_TSV(self,**kwargs):
+        writer = csv.writer(kwargs["file"], delimiter='\t', quotechar='"')
+
         fields = []
         if self.fields is not None:
             fields = self.fields
+        fields1=set(self.fields)
+        all_fields = self.get_keys()
 
+        for field in all_fields:
+            if field not in fields1:
+                fields.append(field)
 
-        
-        
-
+        nfields = len(fields)
+        writer.writerow(fields)
+                
+        for sample in self.samples:
+            row = []
+            for i in range(nfields):
+                row.append(json.dumps(sample[fields[i]]))
+            writer.writerow(row)
 
 def detect_format(filename):
     try:
@@ -85,6 +105,7 @@ def detect_format(filename):
         with open(args.filename) as infile:
             reader = csv.reader(infile, delimiter="\t", quotechar='"')
             headers = next(reader, None)
+            print(headers)
             return "TSV"
     except:
         return None
@@ -142,7 +163,9 @@ def read_logfile(filename):
     else:
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
-        
     
 logfile = read_logfile(args.filename)
-logfile.dump_MCON()
+if args.output == "tsv":
+    logfile.dump_TSV(file=sys.stdout)
+else:
+    logfile.dump_MCON()
