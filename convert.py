@@ -6,7 +6,7 @@ import json
 import csv
 
 parser = argparse.ArgumentParser(description="Convert MCON files")
-parser.add_argument("filename",help="file to convert")
+parser.add_argument("filename",nargs='?', default=None,help="file to convert")
 parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON")
 parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON")
 parser.add_argument("--output",help="output format")
@@ -67,7 +67,7 @@ class LogFile(object):
             return get_keys_non_nested(self.samples[0])
             
     def dump_TSV(self,**kwargs):
-        writer = csv.writer(kwargs["file"], delimiter='\t', quotechar='"')
+        writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
         fields = []
         if self.fields is not None:
@@ -88,84 +88,81 @@ class LogFile(object):
                 row.append(json.dumps(sample[fields[i]]))
             writer.writerow(row)
 
-def detect_format(filename):
-    try:
-        with open(filename) as infile:
-            fileLine = infile.readline().rstrip()
-            header = json.loads(fileLine)
-            if "format" in header and header["format"] == "MCON" and "version" in header:
-                return "MCON"
-            else:
-                # If this is JSON, then its not TSV
-                return None
-    except:
-        pass
+def detect_format(infile, filename):
+    firstline = infile.readline().rstrip()
+    # this shouldn't have any chars that need to be escaped in TSV.
+    # assert( ??? )
 
-    try:
-        with open(args.filename) as infile:
-            reader = csv.reader(infile, delimiter="\t", quotechar='"')
-            headers = next(reader, None)
-            print(headers)
-            return "TSV"
-    except:
-        return None
     
-def read_MCON(filename):
-    with open(filename) as infile:
-        fileLine = infile.readline().rstrip()
+    # want unquoted TSV.  Therefore, we can just read the first line 
+    try:
         header = json.loads(fileLine)
-        samples = []
-        for line in infile:
-            samples.append(json.loads(line))
-        return LogFile(header, samples)
-
-def read_TSV(filename):
-    with open(args.filename) as infile:
-        reader = csv.reader(infile, delimiter="\t", quotechar='"')
-        tsv_fields = next(reader,None)
-        nfields = len(tsv_fields)
-
-        header = dict()
-        header["format"] = "MCON"
-        header["version"] = "0.1"
-        header["fields"] = tsv_fields
-        header["nested"] = False
+        if "format" in header and header["format"] == "MCON" and "version" in header:
+            return ("MCON", firstline)
+        else:
+            # If this is JSON, then its not TSV
+            return None
+    except:
+        return ("TSV", firstline)
     
-        samples = []
-        ignored_lines = 0;
-        for tsv_line in reader:
-            if len(tsv_line) != nfields:
-                print(f"TSV line {1+len(samples)} has {len(tsv_line)} fields, but header has {nfields} fields.", file=sys.stderr)
-                ignored_lines += 1
-                break
-            j = dict()
-            for i in range(nfields):
-                j[tsv_fields[i]] = json.loads(tsv_line[i])
-            samples.append(j)
+def read_MCON(firstline,infile):
+    header = json.loads(firstline)
+    samples = []
+    for line in infile:
+        samples.append(json.loads(line))
+    return LogFile(header, samples)
 
-        for tsv_line in reader:
+def read_TSV(firstline, infile):
+    tsv_fields = firstline.split('\t')
+    nfields = len(tsv_fields)
+
+    header = dict()
+    header["format"] = "MCON"
+    header["version"] = "0.1"
+    header["fields"] = tsv_fields
+    header["nested"] = False
+
+    reader = csv.reader(infile, delimiter="\t", quotechar='"')
+
+    samples = []
+    ignored_lines = 0;
+    for tsv_line in reader:
+        if len(tsv_line) != nfields:
+            print(f"TSV line {1+len(samples)} has {len(tsv_line)} fields, but header has {nfields} fields.", file=sys.stderr)
             ignored_lines += 1
+            break
+        j = dict()
+        for i in range(nfields):
+            j[tsv_fields[i]] = json.loads(tsv_line[i])
+        samples.append(j)
 
-        if ignored_lines > 0:
-            print(f"Skipping the next {ignored_lines} lines.", file=sys.stderr)
-        
-        print(f"Read {len(samples)} samples of TSV with {len(header)} fields.", file=sys.stderr)
-        return LogFile(header, samples)
+    for tsv_line in reader:
+        ignored_lines += 1
 
-def read_logfile(filename):
-    format = detect_format(args.filename)
+    if ignored_lines > 0:
+        print(f"Skipping the next {ignored_lines} lines.", file=sys.stderr)
+
+    print(f"Read {len(samples)} samples of TSV with {len(header)} fields.", file=sys.stderr)
+    return LogFile(header, samples)
+
+def read_logfile(infile,filename):
+    format, firstline  = detect_format(infile, filename)
     if format == "MCON":
-        return read_MCON(filename)
+        return read_MCON(firstline, infile)
     elif format == "TSV":
-        return read_TSV(filename)
+        return read_TSV(firstline, infile)
     elif format is None:
         print(f"Unknown format for file '{filename}'")
     else:
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
     
-logfile = read_logfile(args.filename)
+infile = sys.stdin
+if args.filename is not None:
+    infile = open(args.filename)
+
+logfile = read_logfile(infile, args.filename)
 if args.output == "tsv":
     logfile.dump_TSV(file=sys.stdout)
 else:
-    logfile.dump_MCON()
+    logfile.dump_MCON(file=sys.stdout)
