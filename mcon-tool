@@ -48,7 +48,7 @@ def get_long_names_and_values_data(prefix, value):
             d.update(get_long_names_and_values_data(prefix+'['+k+']', v))
     elif isinstance(value,list):
         for i in range(len(value)):
-            d.update(get_long_names_and_values_data(prefix+'['+str(i)+']', v))
+            d.update(get_long_names_and_values_data(prefix+'['+str(i+1)+']', value[i]))
     else:
         d[prefix] = value
     return d
@@ -213,6 +213,7 @@ class LogFile(object):
                     fields.append(field)
 
             nfields = len(fields)
+            logging.debug(f"Writing TSV: {nfields} fields")
 
             printed_fields = fields
             if "shortNames" in kwargs and kwargs["shortNames"]:
