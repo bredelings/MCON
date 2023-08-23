@@ -96,7 +96,7 @@ def detect_format(infile, filename):
     
     # want unquoted TSV.  Therefore, we can just read the first line 
     try:
-        header = json.loads(fileLine)
+        header = json.loads(firstline)
         if "format" in header and header["format"] == "MCON" and "version" in header:
             return ("MCON", firstline)
         else:
