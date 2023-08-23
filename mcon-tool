@@ -309,8 +309,6 @@ def read_logfile(infile,filename):
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
 
-logging.basicConfig(level=logging.DEBUG)
-
 infile = sys.stdin
 if args.filename is not None:
     infile = open(args.filename)
