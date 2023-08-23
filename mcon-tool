@@ -8,9 +8,10 @@ import logging
 
 parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",nargs='?', default=None,help="file to convert")
-parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON")
-parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON")
-parser.add_argument("--output",help="output format")
+parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON", action='store_true')
+parser.add_argument("--atomize",help="split nested values", action='store_true')
+#parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON", action='store_true')
+parser.add_argument("--output",default="MCON",help="output format")
 args = parser.parse_args()
 
 def is_nested_key(key):
@@ -37,6 +38,49 @@ def get_keys_nested(sample):
             keys.add(key)
     return keys
 
+
+def get_long_names_and_values_data(prefix, value):
+    d = dict()
+    if isinstance(value,dict):
+        for k,v in value.items():
+            d.update(get_long_names_and_values_data(prefix+'['+k+']', v))
+    elif isinstance(value,list):
+        for i in range(len(value)):
+            d.update(get_long_names_and_values_data(prefix+'['+i+']', v))
+    else:
+        d[prefix] = value
+    return d
+
+def atomize(sample, nested):
+    sample2 = dict()
+
+    for k,v in sample.items():
+        if nested and is_nested_key(k):
+            sample3 = dict()
+            for k2,v2 in atomize(v,True).items():
+                sample3[k2] = v2
+            sample2[k] = sample3
+        else:
+            sample2.update(get_long_names_and_values_data(k,v))
+
+    return sample2
+
+def unnest(sample, prefix=""):
+    sample2 = dict()
+    for k,v in sample.items():
+        if is_nested_key(k):
+            sample2.update(unnest(v,prefix+k))
+        else:
+            sample2[prefix+k] = v
+    return sample2
+
+def get_long_names_and_values(sample, nested):
+    sample = unnest(sample)
+    sample = atomize(sample,nested)
+    print(samples2)
+    exit(0)
+    return sample2
+
 class LogFile(object):
     def __init__(self, header, samples):
         self.fields = header.get("fields",None)
@@ -57,6 +101,7 @@ class LogFile(object):
         header["format"] = "MCON"
         header["version"] = "0.1"
         header["nested"] = self.nested
+        header["atomic"] = self.atomic
         print(json.dumps(header),**kwargs)
         for sample in self.samples:
             print(json.dumps(sample),**kwargs)
@@ -66,28 +111,54 @@ class LogFile(object):
             return get_keys_nested(self.samples[0])
         else:
             return get_keys_non_nested(self.samples[0])
-            
+
+    def unnest(self):
+        if self.is_nested():
+            logging.debug("Unnesting samples")
+            samples2 = []
+            for sample in self.samples:
+                samples2.append(unnest(sample))
+            self.samples = samples2
+            self.nested = False
+
+    def atomize(self):
+        if not self.atomic:
+            logging.debug("Atomizing samples")
+            samples2 = []
+            for sample in self.samples:
+                samples2.append(atomize(sample,self.nested))
+                self.samples = samples2
+                self.atomic = True
+
     def dump_TSV(self,**kwargs):
         writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
-        fields = []
-        if self.fields is not None:
-            fields = self.fields
-        fields1=set(self.fields)
-        all_fields = self.get_keys()
+        if self.is_nested():
+            fields = []
+            if self.fields is not None:
+                fields = self.fields
+            fields1=set(self.fields)
+            all_fields = self.get_keys()
 
-        for field in all_fields:
-            if field not in fields1:
-                fields.append(field)
+            for field in all_fields:
+                if field not in fields1:
+                    fields.append(field)
 
-        nfields = len(fields)
-        writer.writerow(fields)
+            nfields = len(fields)
+            writer.writerow(fields)
                 
-        for sample in self.samples:
-            row = []
-            for i in range(nfields):
-                row.append(json.dumps(sample[fields[i]]))
-            writer.writerow(row)
+            for sample in self.samples:
+                row = []
+                for i in range(nfields):
+                    row.append(json.dumps(sample[fields[i]]))
+                writer.writerow(row)
+        else:
+            for sample in self.samples:
+# OK, for each row, we need to construct a map from long names -> values?
+                row = []
+                for i in range(nfields):
+                    row.append(json.dumps(sample[fields[i]]))
+                    writer.writerow(row)
 
 def detect_format(infile, filename):
     firstline = infile.readline().rstrip()
@@ -164,13 +235,24 @@ def read_logfile(infile,filename):
     else:
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
-    
+
+logging.basicConfig(level=logging.DEBUG)
+
 infile = sys.stdin
 if args.filename is not None:
     infile = open(args.filename)
 
 logfile = read_logfile(infile, args.filename)
-if args.output == "tsv":
+
+if args.unnest:
+    logfile.unnest()
+
+if args.atomize:
+    logfile.atomize()
+
+if args.output == "tsv" or args.output == "TSV":
     logfile.dump_TSV(file=sys.stdout)
-else:
+elif args.output == "mcon" or args.output == "MCON":
     logfile.dump_MCON(file=sys.stdout)
+else:
+    print(f"Error: Unrecognized output format '{args.output}'")
