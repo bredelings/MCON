@@ -13,7 +13,7 @@ number and structure of fields is constant.
 
 ## File
 ``` Non-nested
-{"fields": ["iter","x"], "nested": false, "format": "MCON", "version": "0.1"}
+{"fields": ["iter"], "nested": false, "format": "MCON", "version": "0.1"}
 {"iter": 10, "x": [1.1, 2.2, 3.3], "pi": {"A":0.3, "T":0.7}, "y": [1,2]}
 {"iter": 20, "x": [1.2, 2.3, 3.1], "pi": {"A":0.4, "T":0.6}, "y": [3]}
 ```
