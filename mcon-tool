@@ -11,7 +11,7 @@ parser.add_argument("filename",nargs='?', default=None,help="file to convert")
 parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON", action='store_true')
 parser.add_argument("--atomize",help="split nested values", action='store_true')
 #parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON", action='store_true')
-parser.add_argument("--output",default="MCON",help="output format")
+parser.add_argument("-O","--output",default="MCON",help="output format")
 args = parser.parse_args()
 
 def is_nested_key(key):
