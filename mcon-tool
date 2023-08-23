@@ -5,6 +5,7 @@ import argparse
 import json
 import csv
 import logging
+import copy
 
 parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",nargs='?', default=None,help="file to convert")
@@ -133,7 +134,7 @@ class LogFile(object):
     def dump_TSV(self,**kwargs):
         writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
-        if self.is_nested():
+        if not self.is_nested() and self.is_atomic():
             fields = []
             if self.fields is not None:
                 fields = self.fields
@@ -153,12 +154,10 @@ class LogFile(object):
                     row.append(json.dumps(sample[fields[i]]))
                 writer.writerow(row)
         else:
-            for sample in self.samples:
-# OK, for each row, we need to construct a map from long names -> values?
-                row = []
-                for i in range(nfields):
-                    row.append(json.dumps(sample[fields[i]]))
-                    writer.writerow(row)
+            logfile = copy.deepcopy(self)
+            logfile.unnest()
+            logfile.atomize()
+            logfile.dump_TSV(**kwargs)
 
 def detect_format(infile, filename):
     firstline = infile.readline().rstrip()
