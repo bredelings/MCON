@@ -4,6 +4,7 @@ import sys
 import argparse
 import json
 import csv
+import logging
 
 parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",nargs='?', default=None,help="file to convert")
@@ -97,15 +98,21 @@ def detect_format(infile, filename):
     # want unquoted TSV.  Therefore, we can just read the first line 
     try:
         header = json.loads(firstline)
+        logging.debug("JSON detected")
         if "format" in header and header["format"] == "MCON" and "version" in header:
+            logging.debug("MCON detected")
             return ("MCON", firstline)
         else:
             # If this is JSON, then its not TSV
+            logging.debug("Not an MCON file.")
             return None
-    except:
+    except object as e:
+        logging.debug("TSV detected")
+        logging.debug(f"exception {e}")
         return ("TSV", firstline)
     
 def read_MCON(firstline,infile):
+    logging.debug("reading MCON")
     header = json.loads(firstline)
     samples = []
     for line in infile:
@@ -113,6 +120,7 @@ def read_MCON(firstline,infile):
     return LogFile(header, samples)
 
 def read_TSV(firstline, infile):
+    logging.debug("reading TSV")
     tsv_fields = firstline.split('\t')
     nfields = len(tsv_fields)
 
