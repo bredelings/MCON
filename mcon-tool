@@ -250,7 +250,7 @@ def detect_format(infile, filename):
             # If this is JSON, then its not TSV
             logging.debug("Not an MCON file.")
             return None
-    except object as e:
+    except Exception as e:
         logging.debug("TSV detected")
         logging.debug(f"exception {e}")
         return ("TSV", firstline)
