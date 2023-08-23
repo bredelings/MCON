@@ -6,6 +6,7 @@ import json
 import csv
 import logging
 import copy
+from collections import defaultdict
 
 parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",nargs='?', default=None,help="file to convert")
@@ -82,6 +83,72 @@ def get_long_names_and_values(sample, nested):
     exit(0)
     return sample2
 
+def nest(d):
+    d2 = dict()
+
+    subgroups = defaultdict(dict)
+    for k,v in d.items():
+        if "/" in k:
+            prefix,rest = k.split("/",1)
+            prefix += "/"
+            subgroups[prefix][rest] = v
+        else:
+            d2[k] = v
+
+    for k,v in subgroups.items():
+        d2[k] = nest(v)
+
+    return d2
+
+def chop_nested(k):
+    if is_nested_key(k):
+        return k[0:len(k)-1]
+    else:
+        return k
+
+def simplify(m):
+    m2 = dict()
+
+    seen = defaultdict(int)
+
+    # Mark keys as seen
+    for k,v in m.items():
+        seen[chop_nested(k)] += 1
+        if is_nested_key(k):
+            for k2 in v:
+                seen[chop_nested(k2)] += 1
+
+    for k,v in m.items():
+        if is_nested_key(k):
+            ok = True
+            for k2 in v:
+                if seen[k2] > 1:
+                    ok = False
+            if ok:
+                m2.update(v)
+            else:
+                m2[k] = v
+        else:
+            m2[k] = v
+
+    return m2
+
+def shortFields(fields):
+    # 1. Construct the mapping from short field names to position.
+    m = dict()
+    for i in range(len(fields)):
+        m[fields[i]] = i
+
+    m = unnest(simplify(nest(m)))
+
+    # 2. Construct the ORDERED list of short field names.
+    fields2 = ["" for i in range(len(fields))]
+    for name,index in m.items():
+        fields2[index] = name
+
+    return fields2
+
+
 class LogFile(object):
     def __init__(self, header, samples):
         self.fields = header.get("fields",None)
@@ -146,8 +213,13 @@ class LogFile(object):
                     fields.append(field)
 
             nfields = len(fields)
-            writer.writerow(fields)
-                
+
+            printed_fields = fields
+            if "shortNames" in kwargs and kwargs["shortNames"]:
+                printed_fields = shortFields(fields)
+
+            writer.writerow(printed_fields)
+
             for sample in self.samples:
                 row = []
                 for i in range(nfields):
@@ -157,6 +229,8 @@ class LogFile(object):
             logfile = copy.deepcopy(self)
             logfile.unnest()
             logfile.atomize()
+            if "shortNames" not in kwargs:
+                kwargs["shortNames"] = True
             logfile.dump_TSV(**kwargs)
 
 def detect_format(infile, filename):
