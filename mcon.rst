@@ -67,7 +67,7 @@ to know that all the values are atomic before looking at later lines.
 
 "nested"
 ~~~~~~~~
-If the value is ``true``, the file is treated as Nested MCON.  Otherwise the file is treated as Non-Nested MCON.
+If the value is ``false``, the file is treated as Non-Nested MCON.  Otherwise the file is treated as Nested MCON.
 
 "fields"
 ~~~~~~~~
