@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description="Convert MCON files")
 parser.add_argument("filename",nargs='?', default=None,help="file to convert")
 parser.add_argument("--unnest",help="convert nested MCON -> non-nested MCON", action='store_true')
 parser.add_argument("--atomize",help="split nested values", action='store_true')
+parser.add_argument("--drop",nargs='+',help="split nested values")
 #parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON", action='store_true')
 parser.add_argument("-O","--output",default="MCON",help="output format")
 args = parser.parse_args()
@@ -191,6 +192,11 @@ class LogFile(object):
                 self.samples = samples2
                 self.atomic = True
 
+    def drop(self, name):
+        for sample in self.samples:
+            sample.pop(name,None)
+
+
     def dump_TSV(self,**kwargs):
         writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
@@ -324,11 +330,17 @@ def read_logfile(infile,filename):
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
 
+logging.basicConfig(level=logging.DEBUG)
+
 infile = sys.stdin
 if args.filename is not None:
     infile = open(args.filename)
 
 logfile = read_logfile(infile, args.filename)
+
+if args.drop is not None:
+    for name in args.drop:
+        logfile.drop(name)
 
 if args.unnest:
     logfile.unnest()

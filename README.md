@@ -24,6 +24,8 @@ number and structure of fields is constant.
 ./mcon-tool examples/E1.json -O tsv               # MCON -> TSV (short names)
 ./mcon-tool examples/E1.tsv                       # TSV -> MCON
 ./mcon-tool examples/E1.tsv | ./mcon-tool -O tsv  # TSV -> MCON -> TSV
+./mcon-tool examples/E3.json -O tsv               # Fails!
+./mcon-tool examples/E3.json -O tsv --drop y      # OK.
 ```
 
 ## Transformations
