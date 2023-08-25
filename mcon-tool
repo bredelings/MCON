@@ -207,9 +207,12 @@ class LogFile(object):
                     print(f"  Existing fields include: {all_fields}")
                     exit(1)
 
+            fields2 = []
             for field in all_fields:
                 if field not in fields1:
-                    fields.append(field)
+                    fields2.append(field)
+            fields2.sort()
+            fields += fields2
 
             nfields = len(fields)
             logging.debug(f"Writing TSV: {nfields} fields")
