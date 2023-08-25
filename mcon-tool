@@ -236,7 +236,7 @@ class LogFile(object):
                 kwargs["shortNames"] = True
             logfile.dump_TSV(**kwargs)
 
-def detect_format(infile, filename):
+def detect_format(infile):
     firstline = infile.readline().rstrip()
     # this shouldn't have any chars that need to be escaped in TSV.
     # assert( ??? )
@@ -301,7 +301,7 @@ def read_TSV(firstline, infile):
     return LogFile(header, samples)
 
 def read_logfile(infile,filename):
-    format, firstline  = detect_format(infile, filename)
+    format, firstline  = detect_format(infile)
     if format == "MCON":
         return read_MCON(firstline, infile)
     elif format == "TSV":
