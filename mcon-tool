@@ -198,7 +198,7 @@ class LogFile(object):
             fields = []
             if self.fields is not None:
                 fields = self.fields
-            fields1=set(self.fields)
+            fields1=set(fields)
             all_fields = self.get_keys()
 
             for field in fields1:
