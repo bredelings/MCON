@@ -76,13 +76,6 @@ def unnest(sample, prefix=""):
             sample2[prefix+k] = v
     return sample2
 
-def get_long_names_and_values(sample, nested):
-    sample = unnest(sample)
-    sample = atomize(sample,nested)
-    print(samples2)
-    exit(0)
-    return sample2
-
 def nest(d):
     d2 = dict()
 
