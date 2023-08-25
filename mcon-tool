@@ -223,10 +223,22 @@ class LogFile(object):
 
             writer.writerow(printed_fields)
 
+            sample_number = 0
             for sample in self.samples:
+                sample_number += 1
                 row = []
                 for i in range(nfields):
+                    if fields[i] not in sample:
+                        print(f"Error: sample line {sample_number} is missing field '{fields[i]}'")
+                        print(f"  {sample}")
+                        exit(1)
                     row.append(json.dumps(sample[fields[i]]))
+                if len(sample) != nfields:
+                    for k,v in sample.items():
+                        if k not in all_fields:
+                            print(f"Error: sample line {sample_number} has extra field '{k}'");
+                            print(f"  {sample}")
+                            exit(1)
                 writer.writerow(row)
         else:
             logfile = copy.deepcopy(self)
