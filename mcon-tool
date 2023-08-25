@@ -297,7 +297,7 @@ def read_TSV(firstline, infile):
     if ignored_lines > 0:
         print(f"Skipping the next {ignored_lines} lines.", file=sys.stderr)
 
-    print(f"Read {len(samples)} samples of TSV with {len(header)} fields.", file=sys.stderr)
+    print(f"Read {len(samples)} samples of TSV with {nfields} fields.", file=sys.stderr)
     return LogFile(header, samples)
 
 def read_logfile(infile,filename):
