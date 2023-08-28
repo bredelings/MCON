@@ -103,29 +103,37 @@ def chop_nested(k):
 def simplify(m):
     m2 = dict()
 
+    # Mark keys as seen
+    for k,v in m.items():
+        if is_nested_key(k):
+            m2[k] = simplify(v)
+        else:
+            m2[k] = v
+
     seen = defaultdict(int)
 
     # Mark keys as seen
-    for k,v in m.items():
+    for k,v in m2.items():
         seen[chop_nested(k)] += 1
         if is_nested_key(k):
             for k2 in v:
                 seen[chop_nested(k2)] += 1
 
-    for k,v in m.items():
+    m3 = dict()
+    for k,v in m2.items():
         if is_nested_key(k):
             ok = True
             for k2 in v:
                 if seen[k2] > 1:
                     ok = False
             if ok:
-                m2.update(v)
+                m3.update(v)
             else:
-                m2[k] = v
+                m3[k] = v
         else:
-            m2[k] = v
+            m3[k] = v
 
-    return m2
+    return m3
 
 def shortFields(fields):
     # 1. Construct the mapping from short field names to position.
