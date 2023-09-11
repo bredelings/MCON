@@ -208,7 +208,8 @@ class LogFile(object):
 
 
     def dump_TSV(self,**kwargs):
-        writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
+        # We are actually writing TSJ -- no quoting.
+        # writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
         if not self.is_nested() and self.is_atomic():
             fields = []
@@ -227,7 +228,7 @@ class LogFile(object):
             for field in all_fields:
                 if field not in fields1:
                     fields2.append(field)
-            fields2.sort()
+            fields2.sort(key=sort_key)
             fields += fields2
 
             nfields = len(fields)
@@ -237,7 +238,7 @@ class LogFile(object):
             if "shortNames" in kwargs and kwargs["shortNames"]:
                 printed_fields = shortFields(fields)
 
-            writer.writerow(printed_fields)
+            print('\t'.join(printed_fields))
 
             sample_number = 0
             for sample in self.samples:
@@ -255,7 +256,7 @@ class LogFile(object):
                             print(f"Error: sample line {sample_number} has extra field '{k}'");
                             print(f"  {sample}")
                             exit(1)
-                writer.writerow(row)
+                print('\t'.join(row))
         else:
             logfile = copy.deepcopy(self)
             logfile.unnest()
