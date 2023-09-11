@@ -9,6 +9,10 @@ It is based on JSON Lines (https://jsonlines.org) and attempts to overcome limit
 MCON is also designed to allow conversion to and from TSV, when the
 number and structure of fields is constant.
 
+# Specification
+
+See the [full specification](https://github.com/bredelings/MCON/blob/main/mcon.rst).
+
 # Examples
 
 ## File
