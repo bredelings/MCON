@@ -229,11 +229,13 @@ class LogFile(object):
             logfile = copy.deepcopy(self)
             logfile.unnest()
             logfile.atomize()
-            if "shortNames" not in kwargs:
-                kwargs["shortNames"] = True
             logfile.dump_TSV(**kwargs)
+            return
 
         # We should be fully flattened if we get here.
+        if "shortNames" not in kwargs:
+            kwargs["shortNames"] = True
+
         fields = []
         if self.fields is not None:
             fields = self.fields
