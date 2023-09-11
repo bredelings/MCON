@@ -225,59 +225,60 @@ class LogFile(object):
         # We are actually writing TSJ -- no quoting.
         # writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
-        if not self.is_nested() and self.is_atomic():
-            fields = []
-            if self.fields is not None:
-                fields = self.fields
-            fields1=set(fields)
-            all_fields = self.get_keys()
-
-            for field in fields1:
-                if field not in all_fields:
-                    print(f"Error: Header: field '{field}' does not exist!",file=sys.stderr)
-                    print(f"  Existing fields include: {all_fields}")
-                    exit(1)
-
-            fields2 = []
-            for field in all_fields:
-                if field not in fields1:
-                    fields2.append(field)
-            fields2.sort(key=sort_key)
-            fields += fields2
-
-            nfields = len(fields)
-            logging.debug(f"Writing TSV: {nfields} fields")
-
-            printed_fields = fields
-            if "shortNames" in kwargs and kwargs["shortNames"]:
-                printed_fields = shortFields(fields)
-
-            print('\t'.join(printed_fields))
-
-            sample_number = 0
-            for sample in self.samples:
-                sample_number += 1
-                row = []
-                for i in range(nfields):
-                    if fields[i] not in sample:
-                        print(f"Error: sample line {sample_number} is missing field '{fields[i]}'")
-                        print(f"  {sample}")
-                        exit(1)
-                    row.append(json.dumps(sample[fields[i]]))
-                if len(sample) != nfields:
-                    for k,v in sample.items():
-                        if k not in all_fields:
-                            print(f"Error: sample line {sample_number} has extra field '{k}'");
-                            print(f"  {sample}")
-                            exit(1)
-                print('\t'.join(row))
-        else:
+        if self.is_nested() or not self.is_atomic():
             logfile = copy.deepcopy(self)
             logfile.unnest()
             logfile.atomize()
             if "shortNames" not in kwargs:
                 kwargs["shortNames"] = True
             logfile.dump_TSV(**kwargs)
+
+        # We should be fully flattened if we get here.
+        fields = []
+        if self.fields is not None:
+            fields = self.fields
+        fields1=set(fields)
+        all_fields = self.get_keys()
+
+        for field in fields1:
+            if field not in all_fields:
+                print(f"Error: Header: field '{field}' does not exist!",file=sys.stderr)
+                print(f"  Existing fields include: {all_fields}")
+                exit(1)
+
+        fields2 = []
+        for field in all_fields:
+            if field not in fields1:
+                fields2.append(field)
+        fields2.sort(key=sort_key)
+        fields += fields2
+
+        nfields = len(fields)
+        logging.debug(f"Writing TSV: {nfields} fields")
+
+        printed_fields = fields
+        if "shortNames" in kwargs and kwargs["shortNames"]:
+            printed_fields = shortFields(fields)
+
+        print('\t'.join(printed_fields))
+
+        sample_number = 0
+        for sample in self.samples:
+            sample_number += 1
+            row = []
+            for i in range(nfields):
+                if fields[i] not in sample:
+                    print(f"Error: sample line {sample_number} is missing field '{fields[i]}'")
+                    print(f"  {sample}")
+                    exit(1)
+                row.append(json.dumps(sample[fields[i]]))
+            if len(sample) != nfields:
+                for k,v in sample.items():
+                    if k not in all_fields:
+                        print(f"Error: sample line {sample_number} has extra field '{k}'");
+                        print(f"  {sample}")
+                        exit(1)
+            print('\t'.join(row))
 
 def detect_format(infile):
     firstline = infile.readline().rstrip()
