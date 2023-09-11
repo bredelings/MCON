@@ -17,6 +17,20 @@ parser.add_argument("--drop",nargs='+',help="split nested values")
 parser.add_argument("-O","--output",default="MCON",help="output format")
 args = parser.parse_args()
 
+def sort_key(name):
+    # Should we forbid the data keys from containing '[' and ']'?
+    keylist = name.split('[')
+    for i in range(len(keylist)):
+        if i != 0 and keylist[i].endswith(']'):
+            keylist[i] = keylist[i][:-1]
+            # Returning (0,int) and (1,str) avoids doing int < str.
+            try:
+                ikey = int(keylist[i])
+                keylist[i] = (0,ikey)
+            except ValueError:
+                keylist[i] = (1,keylist[i])
+    return keylist
+
 def is_nested_key(key):
     assert(isinstance(key,str))
     if len(key) > 0 and key.endswith('/'):
