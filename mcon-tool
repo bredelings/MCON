@@ -214,7 +214,7 @@ class LogFile(object):
             for sample in self.samples:
                 samples2.append(atomize(sample,self.nested))
                 self.samples = samples2
-                self.atomic = True
+            self.atomic = True
 
     def drop(self, name):
         for sample in self.samples:
