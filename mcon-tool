@@ -289,7 +289,9 @@ def read_MCON(firstline,infile):
     header = json.loads(firstline)
     samples = []
     for line in infile:
-        samples.append(json.loads(line))
+        line = line.strip()
+        if line:
+            samples.append(json.loads(line))
     return LogFile(header, samples)
 
 def read_TSV(firstline, infile):
