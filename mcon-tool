@@ -15,6 +15,7 @@ parser.add_argument("--atomize",help="split nested values", action='store_true')
 parser.add_argument("--drop",nargs='+',help="split nested values")
 #parser.add_argument("--nest",help="convert non-nested MCON -> nested MCON", action='store_true')
 parser.add_argument("-O","--output",default="MCON",help="output format")
+parser.add_argument("-V","--verbose",help="output format", action='store_true')
 args = parser.parse_args()
 
 def sort_key(name):
@@ -270,15 +271,15 @@ class LogFile(object):
             row = []
             for i in range(nfields):
                 if fields[i] not in sample:
-                    print(f"Error: sample line {sample_number} is missing field '{fields[i]}'")
-                    print(f"  {sample}")
+                    print(f"Error: sample line {sample_number} is missing field '{fields[i]}'", file=sys.stderr)
+                    print(f"  {sample}", file=sys.stderr)
                     exit(1)
                 row.append(json.dumps(sample[fields[i]]))
             if len(sample) != nfields:
                 for k,v in sample.items():
                     if k not in all_fields:
-                        print(f"Error: sample line {sample_number} has extra field '{k}'");
-                        print(f"  {sample}")
+                        print(f"Error: sample line {sample_number} has extra field '{k}'", file=sys.stderr);
+                        print(f"  {sample}", file=sys.stderr)
                         exit(1)
             print('\t'.join(row))
 
@@ -360,7 +361,8 @@ def read_logfile(infile,filename):
         print(f"Unknown format {format} for file '{filename}'")
     exit(1)
 
-logging.basicConfig(level=logging.DEBUG)
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
 
 infile = sys.stdin
 if args.filename is not None:
