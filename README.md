@@ -4,7 +4,7 @@ This repo contains the specification for the Monte Carlo Object Notation (MCON) 
 
 It is based on JSON Lines (https://jsonlines.org) and attempts to overcome limitations of formats like TSV that have a fixed number of columns.  In MCON:
 * values can be arrays, dictionaries, or other structured objects
-* the number of structure of fields is not fixed over time.
+* the number and structure of fields is not fixed over time.
 
 MCON is also designed to allow conversion to and from TSV, when the
 number and structure of fields is constant.
