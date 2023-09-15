@@ -1,12 +1,14 @@
 # MCON
 
 This repo contains the specification for the Monte Carlo Object Notation (MCON) format.
+MCON is intended to be an inter-operable file format for saving MCMC samples and associated meta-data.
+It is based on JSON Lines (https://jsonlines.org).
 
-It is based on JSON Lines (https://jsonlines.org) and attempts to overcome limitations of formats like TSV that have a fixed number of columns.  In MCON:
+MCON and attempts to overcome limitations of formats like CSV or TSV that have a fixed number of columns.  In MCON:
 * values can be arrays, dictionaries, or other structured objects
 * the number and structure of fields is not fixed over time.
 
-MCON is also designed to allow conversion to and from TSV, when the
+MCON is also designed to allow conversion to and from CSV or TSV, when the
 number and structure of fields is constant.
 
 # Specification
