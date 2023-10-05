@@ -8,8 +8,8 @@ Monte-Carlo Object Notation (MCON)
 Introduction
 ------------
 
-Monte-Carlo Object Notation (MCON) is a file format for recording samples from Monte-Carlo algorithms.
-The format accomodates multiple different algorithms, including Markov chain Monte Carlo (MCMC), Sequential Monte Carlo (SMC), etc.
+Monte-Carlo Object Notation (MCON) is an inter-operable file format for recording Monte Carlo samples and associated meta-data.
+The format can represent samples from Markov chain Monte Carlo (MCMC), Sequential Monte Carlo (SMC), and other algorithms.
 Each line is a JSON object, following the `JSON Lines <https://jsonlines.org>`_ format.
 The first line is called the "header line".
 All other lines are called "sample lines".
