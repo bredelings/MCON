@@ -228,6 +228,37 @@ def classifyFields(samples):
 
     return (constantFields, varyingFields)
 
+
+def tsv_fields(specified_fields, sample, nested, constantFields):
+
+    if nested:
+        all_fields = get_keys_nested(atomize(sample,True))
+    else:
+        all_fields = get_keys_non_nested(atomize(sample,False))
+
+    if constantFields is None:
+        constantFields = all_fields
+
+    specified_fields_set=set(specified_fields)
+
+    for specified_field in specified_fields_set:
+        if specified_field not in all_fields:
+            print(f"Error: Header: field '{specified_field}' does not exist!",file=sys.stderr)
+            print(f"  Existing fields include: {all_fields}")
+            exit(1)
+        if specified_field not in constantFields:
+            print(f"Error: Header: field '{specified_field}' does not have a fixed structure!",file=sys.stderr)
+            print(f"  Fixed structure fields include: {self.constantFields}")
+            exit(1)
+
+    fields2 = []
+    for field in constantFields:
+        if field not in specified_fields_set:
+            fields2.append(field)
+
+    fields2.sort(key=sort_key)
+    return specified_fields + fields2
+
             
 class LogFile(object):
     def __init__(self, header, samples):
@@ -303,31 +334,7 @@ class LogFile(object):
         if "shortNames" not in kwargs:
             kwargs["shortNames"] = True
 
-        fields = []
-        if self.fields is not None:
-            fields = self.fields
-        fields1=set(fields)
-        all_fields = self.get_keys()
-        if self.constantFields is None:
-            self.constantFields = all_fields
-
-        for field in fields1:
-            if field not in all_fields:
-                print(f"Error: Header: field '{field}' does not exist!",file=sys.stderr)
-                print(f"  Existing fields include: {all_fields}")
-                exit(1)
-            if field not in self.constantFields:
-                print(f"Error: Header: field '{field}' does not have a fixed structure!",file=sys.stderr)
-                print(f"  Fixed structure fields include: {self.constantFields}")
-                exit(1)
-
-
-        fields2 = []
-        for field in self.constantFields:
-            if field not in fields1:
-                fields2.append(field)
-        fields2.sort(key=sort_key)
-        fields += fields2
+        fields = tsv_fields(self.fields, self.samples[0], self.is_nested(), self.constantFields)
 
         nfields = len(fields)
         logging.debug(f"Writing TSV: {nfields} fields")
