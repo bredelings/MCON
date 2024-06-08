@@ -167,14 +167,67 @@ def shortFields(fields):
 
     return fields2
 
+def findConstantFields(j1, j2):
+#    print(f"   findConstantFieldsIn: {j1}   <=>   {j2}")
+    if j1 is None:
+        return None
+    elif isinstance(j1, dict):
+        if not isinstance(j2, dict):
+            return None
+        if j1.keys() != j2.keys():
+            return None
+        for key in j1.keys():
+            j1[key] = findConstantFields(j1[key], j2[key])
+#        print(f"   findConstantFieldsOut: {j1}   <=>   {j2}")
+        return j1
+    elif isinstance(j1, list):
+        if not isinstance(j2, list):
+            return None
+        if len(j1) != len(j2):
+            return None
+        for i in range(0,len(j1)):
+            j1[i] = findConstantFields(j1[i], j2[i])
+#        print(f"   findConstantFieldsOut: {j1}   <=>   {j2}")
+        return j1
+    elif isinstance(j1, str):
+        if not isinstance (j2, str):
+            return None
+    elif isinstance(j1,bool):
+        if not isinstance (j2, bool):
+            return None
+    elif isinstance (j1, (int,float)):
+        if not isinstance (j2, (int,float)):
+            return None
+    else:
+        print(f"I don't recognize object '{j1}'")
+        j1 = None
+    return j1
 
+def classifyFields(samples):
+    fields = copy.deepcopy(samples[0])
+    for i in range(1,len(samples)):
+        fields = findConstantFields(fields, samples[i])
+
+    fields2 = atomize(unnest(fields),False)
+    constantFields = set()
+    varyingFields = set()
+    for key in fields2.keys():
+        if fields2[key] is None:
+            varyingFields.add(key)
+        else:
+            constantFields.add(key)
+
+    return (constantFields, varyingFields)
+
+            
 class LogFile(object):
     def __init__(self, header, samples):
         self.fields = header.get("fields",None)
         self.nested = header.get("nested",True)
         self.atomic = header.get("atomic",False)
         self.samples = samples
-
+        self.constantFields = None
+        
     def is_nested(self):
         return self.nested
 
@@ -227,9 +280,13 @@ class LogFile(object):
         # writer = csv.writer(kwargs["file"], delimiter='\t', quoting=csv.QUOTE_NONE)
 
         if self.is_nested() or not self.is_atomic():
+            (constantFields, varyingFields) = classifyFields(self.samples)
+            if varyingFields:
+                print(f"varying fields = {' '.join(varyingFields)}", file=sys.stderr)
             logfile = copy.deepcopy(self)
             logfile.unnest()
             logfile.atomize()
+            logfile.constantFields = constantFields
             logfile.dump_TSV(**kwargs)
             return
 
@@ -242,15 +299,22 @@ class LogFile(object):
             fields = self.fields
         fields1=set(fields)
         all_fields = self.get_keys()
+        if self.constantFields is None:
+            self.constantFields = all_fields
 
         for field in fields1:
             if field not in all_fields:
                 print(f"Error: Header: field '{field}' does not exist!",file=sys.stderr)
                 print(f"  Existing fields include: {all_fields}")
                 exit(1)
+            if field not in self.constantFields:
+                print(f"Error: Header: field '{field}' does not have a fixed structure!",file=sys.stderr)
+                print(f"  Fixed structure fields include: {self.constantFields}")
+                exit(1)
+
 
         fields2 = []
-        for field in all_fields:
+        for field in self.constantFields:
             if field not in fields1:
                 fields2.append(field)
         fields2.sort(key=sort_key)
@@ -275,14 +339,15 @@ class LogFile(object):
                     print(f"  {sample}", file=sys.stderr)
                     exit(1)
                 row.append(json.dumps(sample[fields[i]]))
-            if len(sample) != nfields:
-                for k,v in sample.items():
-                    if k not in all_fields:
-                        print(f"Error: sample line {sample_number} has extra field '{k}'", file=sys.stderr);
-                        print(f"  {sample}", file=sys.stderr)
-                        exit(1)
+#            if len(sample) != nfields:
+#                for k,v in sample.items():
+#                    if k not in all_fields:
+#                        print(f"Error: sample line {sample_number} has extra field '{k}'", file=sys.stderr);
+#                        print(f"  {sample}", file=sys.stderr)
+#                        exit(1)
             print('\t'.join(row))
 
+# Formats should be MCON/JSON, TSV, TSJ, CSV, CSJ
 def detect_format(infile):
     firstline = infile.readline().rstrip()
     # this shouldn't have any chars that need to be escaped in TSV.
