@@ -19,5 +19,13 @@ jobs:
 
     - name: Install (Linux)
       run: |
+        ./mcon-tool examples/E1.json -O tsv
+        ./mcon-tool examples/E1.tsv
+        ./mcon-tool examples/E1.tsv | ./mcon-tool -O tsv
         ./mcon-tool examples/E3.json -O tsv
         ./mcon-tool examples/E5.json -O tsv
+
+        ./mcon-tool examples/E1.json --unnest
+        ./mcon-tool examples/E1.json --atomize
+        ./mcon-tool examples/E1.json --unnest --atomize
+        ./mcon-tool examples/E1.json --unnest --atomize -O tsv
