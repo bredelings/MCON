@@ -186,7 +186,7 @@ Conversion to other formats
 
 Conversion to TSJ
 ~~~~~~~~~~~~~~~~~
-Since JSON values never contain unescaped tab characters, it is possible to construct TSV files where each value is a JSON value.  We refer to this as tab-separate JSON (TSJ) format.
+Since JSON values never contain unescaped tab characters, it is possible to construct TSV files where each value is a JSON value.  We refer to this as tab-separated JSON (TSJ) format.
 
 Issues: how might this interact with TSV escapes?  Presumably we can say that such files should be read with no tsv escapes...
 
