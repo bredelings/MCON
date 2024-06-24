@@ -110,7 +110,7 @@ Unnesting
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 This transformation only applies to Nested MCON.
 
-1. The header line is modified to replace ``"nested": true`` with ``"nested": false`.
+1. The header line is modified to replace ``"nested": true`` with ``"nested": false``.
 2. Each sample line is replaced with a JSON object containing the union of the (field,value) pairs represented by the keys in the original nested file.
 
 
