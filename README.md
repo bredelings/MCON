@@ -1,4 +1,4 @@
-'# MCON
+# MCON
 
 This repo contains the specification for the Monte Carlo Object Notation (MCON) format.
 MCON is intended to be an inter-operable file format for saving MCMC samples and associated meta-data.
